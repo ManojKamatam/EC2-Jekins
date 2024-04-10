@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: "Name"
+          Value: "MyVPC"
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: "Name"
+          Value: "MySubnet"
+
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-07caf9f60dd9b55bb
+      InstanceType: t2.micro
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: My security group for my EC2 instance
+      VpcId: !Ref VPC
+
+Outputs:
+  InstancePublicIp:
+    Description: The public IP address of the instance
+    Value: !GetAtt Instance.PublicIp
